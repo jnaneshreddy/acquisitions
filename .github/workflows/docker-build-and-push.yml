@@ -7,16 +7,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  I      - name: Update Docker Hub description
-        if: success() && github.ref == 'refs/heads/main'
-        uses: peter-evans/dockerhub-description@v4
-        continue-on-error: true
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: ${{ env.IMAGE_NAME }}
-          short-description: "Acquisitions API - Node.js backend service with Express, PostgreSQL, and JWT authentication"
-          readme-filepath: ./README.md: ${{ github.repository_owner }}/acquisitions
+  IMAGE_NAME: ${{ github.repository_owner }}/acquisitions
 
 jobs:
   build-and-push:

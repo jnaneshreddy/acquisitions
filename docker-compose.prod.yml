@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Application Service for Production
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: acquisitions-app-prod
+    ports:
+      - "8000:3000"
+    env_file:
+      - .env.production
+    networks:
+      - acquisitions-prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Database Migration Service for Production (runs once)
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: acquisitions-migrate-prod
+    env_file:
+      - .env.production
+    networks:
+      - acquisitions-prod-network
+    command: npm run db:migrate
+    restart: "no"
+    depends_on:
+      - app
+
+  # Nginx Reverse Proxy (Optional for production)
+  nginx:
+    image: nginx:alpine
+    container_name: acquisitions-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - acquisitions-prod-network
+    restart: unless-stopped
+
+networks:
+  acquisitions-prod-network:
+    driver: bridge

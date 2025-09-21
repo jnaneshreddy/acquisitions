@@ -394,3 +394,15 @@
 {"ip":"::1","level":"warn","message":"Request blocked by Arcjet","method":"GET","path":"/health","reason":{"max":3,"remaining":0,"reset":18,"resetTime":"2025-09-21T03:26:00.000Z","type":"RATE_LIMIT","window":30},"service":"acquisitions-api","userAgent":"HTTPie"}
 {"ip":"::1","level":"warn","message":"Rate limit exceeded","path":"/health","service":"acquisitions-api","userAgent":"HTTPie"}
 {"level":"info","message":"::1 - - [21/Sep/2025:03:25:42 +0000] \"GET /health HTTP/1.1\" 403 51 \"-\" \"HTTPie\"","service":"acquisitions-api"}
+{"level":"info","message":"::1 - - [21/Sep/2025:03:26:23 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"HTTPie\"","service":"acquisitions-api"}
+{"level":"info","message":"::1 - - [21/Sep/2025:03:26:24 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"HTTPie\"","service":"acquisitions-api"}
+{"level":"info","message":"::1 - - [21/Sep/2025:03:26:25 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"HTTPie\"","service":"acquisitions-api"}
+{"ip":"::1","level":"warn","message":"Request blocked by Arcjet","method":"GET","path":"/health","reason":{"max":3,"remaining":0,"reset":3,"resetTime":"2025-09-21T03:26:30.000Z","type":"RATE_LIMIT","window":10},"service":"acquisitions-api","userAgent":"HTTPie"}
+{"ip":"::1","level":"warn","message":"Rate limit exceeded","path":"/health","service":"acquisitions-api","userAgent":"HTTPie"}
+{"level":"info","message":"::1 - - [21/Sep/2025:03:26:26 +0000] \"GET /health HTTP/1.1\" 403 51 \"-\" \"HTTPie\"","service":"acquisitions-api"}
+{"level":"info","message":"Configuring database for development environment with Neon Local","service":"acquisitions-api"}
+{"level":"info","message":"Connecting to database: postgresql://neondb_owner:***@ep-floral-grass-a1txy2lu-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require","service":"acquisitions-api"}
+{"level":"info","message":"Configuring database for development environment with Neon Local","service":"acquisitions-api"}
+{"level":"info","message":"Connecting to database: postgresql://neondb_owner:***@ep-floral-grass-a1txy2lu-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require","service":"acquisitions-api"}
+{"level":"info","message":"Configuring database for development environment with Neon Local","service":"acquisitions-api"}
+{"level":"info","message":"Connecting to database: postgresql://neondb_owner:***@ep-floral-grass-a1txy2lu-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require","service":"acquisitions-api"}

@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Development
+  postgres:
+    image: postgres:16-alpine
+    container_name: acquisitions-postgres-dev
+    ports:
+      - "5432:5432"
+    environment:
+      # PostgreSQL Configuration
+      POSTGRES_DB: acquisitions_dev
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts:/docker-entrypoint-initdb.d
+    networks:
+      - acquisitions-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev_user -d acquisitions_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: acquisitions-app-dev
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env.development
+    volumes:
+      # Mount source code for hot reload in development
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./drizzle:/app/drizzle
+      - ./scripts:/app/scripts
+      # Exclude node_modules to prevent conflicts
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - acquisitions-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Database Migration Service (runs once)
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: acquisitions-migrate-dev
+    env_file:
+      - .env.development
+    volumes:
+      - ./src:/app/src
+      - ./drizzle:/app/drizzle
+      - ./scripts:/app/scripts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - acquisitions-dev-network
+    command: npm run db:setup
+    restart: "no"
+
+volumes:
+  postgres_dev_data:
+    driver: local
+
+networks:
+  acquisitions-dev-network:
+    driver: bridge

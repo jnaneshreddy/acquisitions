@@ -30,21 +30,17 @@ app.use(
 // Apply Arcjet security middleware globally
 app.use(securityMiddleware);
 
-const PORT = process.env.PORT || 3000;
-
 app.get('/', (req, res) => {
   logger.info('hello from acquisitions');
   res.status(200).send('hello from acquisitions');
 });
 
 app.get('/health', (req, res) => {
-  res
-    .status(200)
-    .json({
-      status: 'OK',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-    });
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
 });
 
 app.get('/api', (req, res) => {
@@ -55,7 +51,7 @@ app.get('/api', (req, res) => {
 app.use('/api/auth', authRouts);
 app.use('/api/users', usersRoutes);
 
-app.use((req,res) =>{
-  res.status(404).json({error:'route not found'});
+app.use((req, res) => {
+  res.status(404).json({ error: 'route not found' });
 });
 export default app;

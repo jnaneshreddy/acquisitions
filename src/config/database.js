@@ -23,35 +23,49 @@ let db;
 if (isDevelopment || isTest) {
   // Development and Test configuration - use standard PostgreSQL
   const envName = isDevelopment ? 'development' : 'test';
-  logger.info(`Configuring database for ${envName} environment with PostgreSQL`);
-  
+  logger.info(
+    `Configuring database for ${envName} environment with PostgreSQL`
+  );
+
   const connectionString = process.env.DATABASE_URL;
-  logger.info(`Connecting to database: ${connectionString.replace(/:[^:]*@/, ':***@')}`);
-  
+  logger.info(
+    `Connecting to database: ${connectionString.replace(/:[^:]*@/, ':***@')}`
+  );
+
   // Use standard postgres client for local development and testing
   sql = postgres(connectionString, {
     transform: postgres.camel,
-    max: isTest ? 5 : 10 // Fewer connections for tests
+    max: isTest ? 5 : 10, // Fewer connections for tests
   });
   db = drizzlePg(sql, {
-    logger: isTest ? false : {
-      logQuery: (query, params) => {
-        logger.debug('Database query:', { query, params });
+    logger: isTest
+      ? false
+      : {
+        logQuery: (query, params) => {
+          logger.debug('Database query:', { query, params });
+        },
       },
-    },
   });
 } else if (isProduction) {
   // Production configuration for Neon Cloud
-  logger.info('Configuring database for production environment with Neon Cloud');
-  
+  logger.info(
+    'Configuring database for production environment with Neon Cloud'
+  );
+
   // Ensure we have a valid production DATABASE_URL
   if (!process.env.DATABASE_URL.includes('neon.tech')) {
-    logger.error('Production DATABASE_URL must be set to a valid Neon Cloud connection string');
-    throw new Error('Production DATABASE_URL must be set to a valid Neon Cloud connection string');
+    logger.error(
+      'Production DATABASE_URL must be set to a valid Neon Cloud connection string'
+    );
+    throw new Error(
+      'Production DATABASE_URL must be set to a valid Neon Cloud connection string'
+    );
   }
-  
-  logger.info(`Connecting to database: ${process.env.DATABASE_URL.replace(/:[^:@]+@/, ':***@')}`);
-  
+
+  logger.info(
+    `Connecting to database: ${process.env.DATABASE_URL.replace(/:[^:@]+@/, ':***@')}`
+  );
+
   // Use Neon serverless for production
   sql = neon(process.env.DATABASE_URL);
   db = drizzle(sql, {
@@ -60,8 +74,10 @@ if (isDevelopment || isTest) {
 } else {
   // Default configuration - use Neon
   logger.warn('Unknown environment, using Neon configuration');
-  logger.info(`Connecting to database: ${process.env.DATABASE_URL.replace(/:[^:@]+@/, ':***@')}`);
-  
+  logger.info(
+    `Connecting to database: ${process.env.DATABASE_URL.replace(/:[^:@]+@/, ':***@')}`
+  );
+
   sql = neon(process.env.DATABASE_URL);
   db = drizzle(sql, {
     logger: {

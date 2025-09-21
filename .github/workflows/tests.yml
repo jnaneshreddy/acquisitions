@@ -126,7 +126,7 @@ jobs:
         run: |
           echo "# 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ steps.test.outputs.test-exit-code }}" = "0" ]; then
             echo "✅ **All tests passed successfully!**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -139,10 +139,10 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Please check the test output and fix the failing tests." >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Coverage Report" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ -f "coverage/lcov-report/index.html" ]; then
             echo "📊 Coverage reports have been generated and uploaded as artifacts." >> $GITHUB_STEP_SUMMARY
             echo "- **Retention:** 30 days" >> $GITHUB_STEP_SUMMARY
@@ -150,7 +150,7 @@ jobs:
           else
             echo "⚠️ No coverage report found." >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "*Test run completed at $(date)*" >> $GITHUB_STEP_SUMMARY
@@ -162,9 +162,9 @@ jobs:
           script: |
             const fs = require('fs');
             const testExitCode = '${{ steps.test.outputs.test-exit-code }}';
-            
+
             let body = '## 🧪 Test Results\n\n';
-            
+
             if (testExitCode === '0') {
               body += '✅ **All tests passed successfully!**\n\n';
               body += '- Node.js: 20.x\n';
@@ -175,7 +175,7 @@ jobs:
               body += '❌ **Some tests failed.**\n\n';
               body += 'Please check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed test output.\n\n';
             }
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

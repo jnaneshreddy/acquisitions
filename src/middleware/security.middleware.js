@@ -2,7 +2,9 @@ import aj from '#config/arcjet.js';
 import logger from '#config/logger.js';
 import { slidingWindow } from '@arcjet/node';
 
-const isDevelopment = process.env.ARCJET_ENV === 'development' || process.env.NODE_ENV === 'development';
+const isDevelopment =
+  process.env.ARCJET_ENV === 'development' ||
+  process.env.NODE_ENV === 'development';
 
 const securityMiddleware = async (req, res, next) => {
   try {
@@ -51,12 +53,10 @@ const securityMiddleware = async (req, res, next) => {
         path: req.path,
       });
 
-      return res
-        .status(403)
-        .json({
-          error: 'Forbidden',
-          message: 'Automated requests are not allowed',
-        });
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Automated requests are not allowed',
+      });
     }
 
     if (decision.isDenied() && decision.reason.isShield()) {
@@ -67,12 +67,10 @@ const securityMiddleware = async (req, res, next) => {
         method: req.method,
       });
 
-      return res
-        .status(403)
-        .json({
-          error: 'Forbidden',
-          message: 'Request blocked by security policy',
-        });
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Request blocked by security policy',
+      });
     }
 
     if (decision.isDenied() && decision.reason.isRateLimit()) {
@@ -94,20 +92,20 @@ const securityMiddleware = async (req, res, next) => {
       stack: e.stack,
       isDevelopment,
     });
-    
+
     // In development, log error but don't block requests
     if (isDevelopment) {
-      logger.warn('Arcjet error in development mode - allowing request to proceed');
+      logger.warn(
+        'Arcjet error in development mode - allowing request to proceed'
+      );
       return next();
     }
-    
+
     // In production, return error response
-    res
-      .status(500)
-      .json({
-        error: 'Internal server error',
-        message: 'Something went wrong with security middleware',
-      });
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Something went wrong with security middleware',
+    });
   }
 };
 export default securityMiddleware;

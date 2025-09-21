@@ -75,7 +75,7 @@ jobs:
         run: |
           echo "# 🐳 Docker Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ steps.build.outcome }}" = "success" ]; then
             echo "✅ **Docker image built and pushed successfully!**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -107,7 +107,7 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Please check the build logs for more details." >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "*Build completed at $(date)*" >> $GITHUB_STEP_SUMMARY
@@ -119,7 +119,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ env.IMAGE_NAME }}
-          short-description: "Acquisitions API - Node.js backend service with Express, PostgreSQL, and JWT authentication"
+          short-description: 'Acquisitions API - Node.js backend service with Express, PostgreSQL, and JWT authentication'
           readme-filepath: ./README.md
 
       - name: Security scan

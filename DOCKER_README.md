@@ -26,11 +26,12 @@ Before you begin, ensure you have the following installed:
 For the fastest setup, use the quick start scripts:
 
 ### **Linux/macOS:**
+
 ```bash
 # Development environment
 ./start.sh dev
 
-# Production environment  
+# Production environment
 ./start.sh prod
 
 # Other commands
@@ -41,6 +42,7 @@ For the fastest setup, use the quick start scripts:
 ```
 
 ### **Windows:**
+
 ```cmd
 :: Development environment
 start.bat dev
@@ -64,22 +66,25 @@ The development environment uses **Neon Local** to provide a local PostgreSQL da
 ### Quick Start
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/jnaneshreddy/acquisitions.git
    cd acquisitions
    ```
 
 2. **Set up environment variables**:
+
    ```bash
    # Development environment file already exists
    # Check .env.development for development settings
-   
+
    # For production, create from template:
    cp .env.production.template .env.production
    # Edit .env.production with your actual values
    ```
 
 3. **Start the development environment**:
+
    ```bash
    docker-compose -f docker-compose.dev.yml up --build
    ```
@@ -130,6 +135,7 @@ The production environment connects directly to **Neon Cloud** for a managed Pos
    - Copy the connection string
 
 2. **Configure production environment**:
+
    ```bash
    cp .env.production.template .env.production
    # Edit .env.production with your actual values
@@ -145,6 +151,7 @@ The production environment connects directly to **Neon Cloud** for a managed Pos
 ### Production Deployment
 
 1. **Build and deploy**:
+
    ```bash
    # Ensure .env.production is configured
    # Start production environment
@@ -178,22 +185,22 @@ graph TD
 
 ### Development (.env.development)
 
-| Variable | Value | Description |
-|----------|--------|-------------|
-| `NODE_ENV` | `development` | Environment mode |
+| Variable       | Value                                                               | Description                 |
+| -------------- | ------------------------------------------------------------------- | --------------------------- |
+| `NODE_ENV`     | `development`                                                       | Environment mode            |
 | `DATABASE_URL` | `postgresql://dev_user:dev_password@postgres:5432/acquisitions_dev` | PostgreSQL Local connection |
-| `ARCJET_ENV` | `development` | Arcjet environment |
-| `LOG_LEVEL` | `debug` | Logging level |
+| `ARCJET_ENV`   | `development`                                                       | Arcjet environment          |
+| `LOG_LEVEL`    | `debug`                                                             | Logging level               |
 
 ### Production (.env.production)
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NODE_ENV` | ✅ | Set to `production` |
-| `DATABASE_URL` | ✅ | Neon Cloud connection string |
-| `ARCJET_KEY` | ✅ | Production Arcjet API key |
-| `JWT_SECRET` | ✅ | Strong JWT secret (256+ bits) |
-| `LOG_LEVEL` | ❌ | Defaults to `info` |
+| Variable       | Required | Description                   |
+| -------------- | -------- | ----------------------------- |
+| `NODE_ENV`     | ✅       | Set to `production`           |
+| `DATABASE_URL` | ✅       | Neon Cloud connection string  |
+| `ARCJET_KEY`   | ✅       | Production Arcjet API key     |
+| `JWT_SECRET`   | ✅       | Strong JWT secret (256+ bits) |
+| `LOG_LEVEL`    | ❌       | Defaults to `info`            |
 
 ## 🐳 Docker Commands
 
@@ -266,6 +273,7 @@ docker system prune -af
 **Error**: `Error connecting to database`
 
 **Solution**:
+
 ```bash
 # Check if database container is running
 docker-compose -f docker-compose.dev.yml ps
@@ -283,6 +291,7 @@ docker-compose -f docker-compose.dev.yml up --build
 **Error**: `Port 3000 is already allocated`
 
 **Solution**:
+
 ```bash
 # Find process using port
 lsof -i :3000  # macOS/Linux
@@ -303,6 +312,7 @@ docker-compose -f docker-compose.dev.yml down
 **Error**: `Migration failed`
 
 **Solution**:
+
 ```bash
 # Run migration manually
 docker-compose -f docker-compose.dev.yml run --rm migrate
@@ -351,6 +361,7 @@ docker-compose -f docker-compose.dev.yml exec app sh
 ## 📞 Support
 
 For issues related to:
+
 - **Application**: Check application logs and health endpoints
 - **Database**: Check PostgreSQL/Neon Cloud connectivity
 - **Docker**: Verify Docker and Docker Compose versions
@@ -359,15 +370,17 @@ For issues related to:
 ## 📋 Quick Reference
 
 ### **Single Command Execution:**
+
 ```bash
 # Linux/macOS
 ./start.sh [dev|prod] [up|down|logs|restart|clean]
 
-# Windows  
+# Windows
 start.bat [dev|prod] [up|down|logs|restart|clean]
 ```
 
 ### **Manual Docker Commands:**
+
 ```bash
 # Development
 docker-compose -f docker-compose.dev.yml up --build -d
@@ -377,6 +390,7 @@ docker-compose -f docker-compose.prod.yml up --build -d
 ```
 
 ### **Environment Files:**
+
 - **`.env.development`** - Development configuration (PostgreSQL Local)
 - **`.env.production`** - Production configuration (Neon Cloud)
 - **`.env.production.template`** - Template for new deployments

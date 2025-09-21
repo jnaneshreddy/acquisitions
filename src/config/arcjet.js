@@ -1,7 +1,5 @@
 import arcjet, { shield, detectBot, slidingWindow } from '@arcjet/node';
 
-const isDevelopment = process.env.ARCJET_ENV === 'development' || process.env.NODE_ENV === 'development';
-
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   // Use LIVE mode to actually test rate limiting

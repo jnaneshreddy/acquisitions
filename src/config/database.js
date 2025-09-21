@@ -41,10 +41,10 @@ if (isDevelopment || isTest) {
     logger: isTest
       ? false
       : {
-        logQuery: (query, params) => {
-          logger.debug('Database query:', { query, params });
+          logQuery: (query, params) => {
+            logger.debug('Database query:', { query, params });
+          },
         },
-      },
   });
 } else if (isProduction) {
   // Production configuration for Neon Cloud

@@ -3,6 +3,17 @@ import js from '@eslint/js';
 export default [
   js.configs.recommended,
   {
+    ignores: [
+      'node_modules/**',
+      'coverage/**',
+      'logs/**',
+      'drizzle/**',
+      '*.log',
+      'package-lock.json',
+      'src/config/database.js',
+    ],
+  },
+  {
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',

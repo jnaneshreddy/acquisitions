@@ -1,2 +1,24 @@
 node_modules
 .env
+.env.test
+coverage
+
+# Test artifacts
+test-output.log
+*.log
+
+# Build artifacts
+dist/
+build/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# CI/CD
+.github/secrets/

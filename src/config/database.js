@@ -8,6 +8,7 @@ import logger from './logger.js';
 // Environment detection
 const isDevelopment = process.env.NODE_ENV === 'development';
 const isProduction = process.env.NODE_ENV === 'production';
+const isTest = process.env.NODE_ENV === 'test';
 
 // Validate DATABASE_URL exists
 if (!process.env.DATABASE_URL) {
@@ -19,20 +20,21 @@ let sql;
 let db;
 
 // Configure database connection based on environment
-if (isDevelopment) {
-  // Development configuration - use standard PostgreSQL
-  logger.info('Configuring database for development environment with PostgreSQL');
+if (isDevelopment || isTest) {
+  // Development and Test configuration - use standard PostgreSQL
+  const envName = isDevelopment ? 'development' : 'test';
+  logger.info(`Configuring database for ${envName} environment with PostgreSQL`);
   
   const connectionString = process.env.DATABASE_URL;
   logger.info(`Connecting to database: ${connectionString.replace(/:[^:]*@/, ':***@')}`);
   
-  // Use standard postgres client for local development
+  // Use standard postgres client for local development and testing
   sql = postgres(connectionString, {
     transform: postgres.camel,
-    max: 10
+    max: isTest ? 5 : 10 // Fewer connections for tests
   });
   db = drizzlePg(sql, {
-    logger: {
+    logger: isTest ? false : {
       logQuery: (query, params) => {
         logger.debug('Database query:', { query, params });
       },

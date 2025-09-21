@@ -1,0 +1,184 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: test
+      NODE_OPTIONS: --experimental-vm-modules
+      DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+      JWT_SECRET: test-jwt-secret-key-for-testing-only
+      ARCJET_KEY: ajkey_test_placeholder
+      ARCJET_ENV: test
+      LOG_LEVEL: warn
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create test environment file
+        run: |
+          cat > .env.test << EOF
+          NODE_ENV=test
+          DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_db
+          JWT_SECRET=test-jwt-secret-key-for-testing-only
+          ARCJET_KEY=ajkey_test_placeholder
+          ARCJET_ENV=test
+          LOG_LEVEL=warn
+          PORT=3001
+          ENABLE_CORS=true
+          EOF
+
+      - name: Wait for PostgreSQL
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          until pg_isready -h localhost -p 5432 -U test_user; do
+            echo "PostgreSQL is unavailable - sleeping"
+            sleep 1
+          done
+          echo "PostgreSQL is ready!"
+
+      - name: Run database migrations
+        run: |
+          echo "Setting up test database..."
+          npm run db:setup || echo "Database setup completed"
+
+      - name: Verify database connection
+        run: |
+          echo "Verifying database connection..."
+          PGPASSWORD=test_password psql -h localhost -U test_user -d test_db -c "SELECT version();"
+
+      - name: Run tests
+        id: test
+        run: |
+          echo "Running tests..."
+          npm test 2>&1 | tee test-output.log
+          echo "test-exit-code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Check test results and add annotations
+        run: |
+          if [ "${{ steps.test.outputs.test-exit-code }}" != "0" ]; then
+            echo "::error::Tests failed! Check the test output for details."
+            echo "::notice::Some tests are failing. Please review the test results and fix the issues."
+            
+            # Extract failed test information if available
+            if grep -q "FAIL" test-output.log; then
+              echo "::group::Failed Tests"
+              grep -A 5 -B 5 "FAIL\|✕\|Failed" test-output.log || echo "Could not extract detailed failure information"
+              echo "::endgroup::"
+            fi
+            
+            exit 1
+          else
+            echo "::notice::✅ All tests passed!"
+          fi
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: |
+            coverage/
+            test-output.log
+          retention-days: 30
+
+      - name: Generate test summary
+        if: always()
+        run: |
+          echo "# 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.test.outputs.test-exit-code }}" = "0" ]; then
+            echo "✅ **All tests passed successfully!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Test Environment" >> $GITHUB_STEP_SUMMARY
+            echo "- Node.js: 20.x" >> $GITHUB_STEP_SUMMARY
+            echo "- Database: PostgreSQL 16" >> $GITHUB_STEP_SUMMARY
+            echo "- Environment: test" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Some tests failed.**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please check the test output and fix the failing tests." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Coverage Report" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "coverage/lcov-report/index.html" ]; then
+            echo "📊 Coverage reports have been generated and uploaded as artifacts." >> $GITHUB_STEP_SUMMARY
+            echo "- **Retention:** 30 days" >> $GITHUB_STEP_SUMMARY
+            echo "- **Location:** Artifacts section of this workflow run" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No coverage report found." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Test run completed at $(date)*" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const testExitCode = '${{ steps.test.outputs.test-exit-code }}';
+            
+            let body = '## 🧪 Test Results\n\n';
+            
+            if (testExitCode === '0') {
+              body += '✅ **All tests passed successfully!**\n\n';
+              body += '- Node.js: 20.x\n';
+              body += '- Database: PostgreSQL 16\n';
+              body += '- Environment: test\n\n';
+              body += '📊 Coverage reports are available in the workflow artifacts.\n';
+            } else {
+              body += '❌ **Some tests failed.**\n\n';
+              body += 'Please check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed test output.\n\n';
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

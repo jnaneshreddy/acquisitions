@@ -89,23 +89,16 @@ jobs:
         id: test
         run: |
           echo "Running tests..."
-          npm test 2>&1 | tee test-output.log
-          echo "test-exit-code=$?" >> $GITHUB_OUTPUT
+          set -e  # Exit on first error
+          npm test
+          echo "test-exit-code=0" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Check test results and add annotations
         run: |
-          if [ "${{ steps.test.outputs.test-exit-code }}" != "0" ]; then
+          if [ "${{ steps.test.outcome }}" != "success" ]; then
             echo "::error::Tests failed! Check the test output for details."
             echo "::notice::Some tests are failing. Please review the test results and fix the issues."
-            
-            # Extract failed test information if available
-            if grep -q "FAIL" test-output.log; then
-              echo "::group::Failed Tests"
-              grep -A 5 -B 5 "FAIL\|✕\|Failed" test-output.log || echo "Could not extract detailed failure information"
-              echo "::endgroup::"
-            fi
-            
             exit 1
           else
             echo "::notice::✅ All tests passed!"
@@ -118,7 +111,8 @@ jobs:
           name: coverage-reports
           path: |
             coverage/
-            test-output.log
+            jest-report.json
+            test-results.xml
           retention-days: 30
 
       - name: Generate test summary
@@ -127,7 +121,7 @@ jobs:
           echo "# 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ steps.test.outputs.test-exit-code }}" = "0" ]; then
+          if [ "${{ steps.test.outcome }}" = "success" ]; then
             echo "✅ **All tests passed successfully!**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "## Test Environment" >> $GITHUB_STEP_SUMMARY
@@ -161,11 +155,11 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const testExitCode = '${{ steps.test.outputs.test-exit-code }}';
+            const testOutcome = '${{ steps.test.outcome }}';
 
             let body = '## 🧪 Test Results\n\n';
 
-            if (testExitCode === '0') {
+            if (testOutcome === 'success') {
               body += '✅ **All tests passed successfully!**\n\n';
               body += '- Node.js: 20.x\n';
               body += '- Database: PostgreSQL 16\n';
